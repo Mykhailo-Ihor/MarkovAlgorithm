@@ -37,14 +37,16 @@ public:
         data = result;
     }
 
-    bool applySubstitutions(const std::vector<std::pair<std::string, std::string>>& substitutions) {
+    bool applySubstitutions(std::vector<std::pair<std::string, std::string>>& substitutions) {
         bool applied = false;
-        for (const auto& sub : substitutions) {
-            if (toString().find(sub.first) != std::string::npos) 
+        for (auto sub : substitutions) {
+            if (toString().find(sub.first) != std::string::npos)
             {
-                if (sub.second.find(".") != std::string::npos) {
+                if (!sub.second.empty() && sub.second.front() == '.')
+                {
                     std::string temp(data.begin(), data.end());
-                    temp.replace(temp.find("."), sub.first.size(), sub.second);
+                    sub.second.erase(0, 1);
+                    temp.replace(temp.find(sub.first), sub.first.size(), sub.second);
                     data = std::vector<char>(temp.begin(), temp.end());
                     return false;
                 }
@@ -53,15 +55,15 @@ public:
                 break;
             }
         }
+
         return applied;
     }
-
     std::string toString() const {
         return std::string(data.begin(), data.end());
     }
 };
 
-void MarkovAlgorithm(String& str, const std::vector<std::pair<std::string, std::string>>& substitutions) 
+void MarkovAlgorithm(String& str,std::vector<std::pair<std::string, std::string>>& substitutions) 
 {
 	while (str.applySubstitutions(substitutions));
 }
@@ -118,13 +120,18 @@ int main() {
     
 	}
     std::cout << "Entered substitution rules:" << std::endl;
-    for (const auto& rule : substitutions3) 
-    {
+    for (auto rule : substitutions3) {
         std::cout << "\"" << rule.first << "\"";
-        if (rule.second != ".")
-            std::cout << " -> ";
+        if (!rule.second.empty() && rule.second.front() == '.')
+        {
+            
+            rule.second.erase(0, 1);
+            std::cout << " ->.";
+        }
         else
-            std::cout << " ->. ";
+        {
+            std::cout << " -> ";
+        }
         std::cout << "\"" << rule.second << "\"" << std::endl;
     }
     MarkovAlgorithm(example3, substitutions3);
